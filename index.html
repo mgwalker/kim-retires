@@ -43,31 +43,26 @@
       const shutdown = moment.tz("2020-12-02 00:00", "America/Chicago");
 
       const squash = function(data) {
-        let str = "";
+        const units = ['month','day','hour','minute','second']
+        const bits = units.map(u => Math.abs(data.get(u)));
 
-        let seconds = Math.abs(data.asSeconds());
-        const units = [
-          [86400, "days"],
-          [3600, "hours"],
-          [60, "minutes"],
-          [1, "seconds"]
-        ];
-        units.forEach(([div, label], i) => {
-          const whole = Math.floor(seconds / div);
-          if (whole) {
-            if (str.length) {
-              str += ", ";
-              if (i === units.length) {
-                str += "and ";
-              }
-            }
-            str += whole + " " + label;
+        while(bits[0] === 0) {
+          units.shift();
+          bits.shift();
+        }
 
-            seconds -= whole * div;
-          }
-        });
+        const all = bits.map(
+          (bit, i) => `${bit} ${units[i]}${bit === 1 ? '' : 's'}`
+        );
 
-        return str;
+        if(all.length > 1) {
+          all[all.length - 1] = `and ${all[all.length - 1]}`;
+        }
+
+        if(all.length > 2) {
+          return all.join(', ');
+        }
+        return all.join(' ');
       };
 
       const update = function() {
